@@ -1,0 +1,3 @@
+- description: kill a 'docker-composed' TiDB cluster node
+  code:     kill-cluster
+  args:     ["tidb-docker-compose_tikv0_1"]

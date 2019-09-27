@@ -1,0 +1,2 @@
+- description: stop a 'docker-composed' TiDB cluster
+  code:     stop-cluster

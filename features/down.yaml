@@ -1,0 +1,2 @@
+- description: shutdown a 'docker-composed' TiDB cluster
+  code:     down-cluster

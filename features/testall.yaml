@@ -1,0 +1,22 @@
+- description: starting a TiDB cluster
+  code:     start-cluster
+- description: create a database
+  code:     create-db
+  args:     ["test"]
+- description: create a table
+  code:     create-tb
+  args:     ["test", "test"]
+- description: insert data
+  code:     insert-tb
+  args:     ["test", "test", "we testing all the data and insert one"]
+- description: kill a server
+  code:     kill-cluster
+  args:     ["tidb-container1"]
+- description: insert data
+  code:     insert-tb
+  args:     ["test", "test", "this is a data after kill a server"]
+- description: query all the data from table
+  code:     query-all
+  args:     ["test-table"]
+- description: stop a 'docker-composed' TiDB cluster
+  code:     stop-cluster

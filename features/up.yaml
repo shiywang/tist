@@ -1,0 +1,2 @@
+- description: starting a 'docker-composed' TiDB cluster
+  code:     start-cluster

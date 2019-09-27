@@ -1,0 +1,3 @@
+- description: query all the data from table
+  code:     query-all
+  args:     ["test", "test"]

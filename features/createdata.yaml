@@ -1,0 +1,9 @@
+- description: create a database
+  code:     create-db
+  args:     ["test"]
+- description: create a table
+  code:     create-tb
+  args:     ["test", "test"]
+- description: insert data into table 'test'
+  code:     insert-tb
+  args:     ["test", "test", "test123123"]

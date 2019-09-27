@@ -1,0 +1,3 @@
+- description: insert data
+  code:     insert-tb
+  args:     ["test", "test", "we insert a new value"]
