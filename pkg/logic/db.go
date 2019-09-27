@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+
 	"github.com/shiywang/tist/pkg/base/mysql"
 	"github.com/shiywang/tist/pkg/util"
 )
@@ -19,8 +20,8 @@ const (
 	defaultUser        = "root"
 	defaultPassWord    = ""
 	defaultCharSet     = "utf8"
-	defaultMaxOpenConn = 10
-	defaultMaxIdleConn = 5
+	defaultMaxOpenConn = 20
+	defaultMaxIdleConn = 20
 )
 
 func (m *MysqlDB) CreateDB(dbName string) {
@@ -34,9 +35,6 @@ func (m *MysqlDB) CreateDB(dbName string) {
 }
 
 func (m *MysqlDB) CreateTable(dbName, tableName string) {
-	m.sql = mysql.CreateMySQLClient(localhost, defaultPort, dbName, defaultUser, defaultPassWord, defaultCharSet,
-		defaultMaxOpenConn, defaultMaxIdleConn)
-
 	if m.sql != nil {
 		if _, err := m.sql.Exec(fmt.Sprintf("DROP TABLE IF EXISTS %s", tableName)); err != nil {
 			util.CheckErr(err)
@@ -61,9 +59,6 @@ func (m *MysqlDB) CreateTable(dbName, tableName string) {
 }
 
 func (m *MysqlDB) InsertTable(dbName, tableName, data string) {
-	m.sql = mysql.CreateMySQLClient(localhost, defaultPort, dbName, defaultUser, defaultPassWord, defaultCharSet,
-		defaultMaxOpenConn, defaultMaxIdleConn)
-
 	if m.sql != nil {
 		buf := new(bytes.Buffer)
 
@@ -94,12 +89,9 @@ func (m *MysqlDB) InsertTable(dbName, tableName, data string) {
 }
 
 func (m *MysqlDB) QueryAll(dbName, tableName string) {
-	m.sql = mysql.CreateMySQLClient(localhost, defaultPort, dbName, defaultUser, defaultPassWord, defaultCharSet,
-		defaultMaxOpenConn, defaultMaxIdleConn)
-
-	var out []map[string]interface{}
-	var err error
 	if m.sql != nil {
+		var out []map[string]interface{}
+		var err error
 		sql := "select * from " + tableName
 		if out, err = m.sql.Query(sql); err != nil {
 			util.CheckErr(err)

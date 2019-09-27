@@ -1,6 +1,6 @@
 package api
 
-type DB interface {
+type DatabaseTester interface {
 	CreateDB(dbName string)
 	CreateTable(dbName, tableName string)
 	InsertTable(dbName, tableName, data string)

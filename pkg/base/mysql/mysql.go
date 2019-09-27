@@ -1,3 +1,10 @@
+/*
+
+This code is a reference from https://github.com/hopehook/golang-db
+with slightly modification
+
+ */
+
 package mysql
 
 import (
@@ -6,13 +13,12 @@ import (
 	"fmt"
 	"log"
 	"strconv"
-	"sync"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/gookit/color"
 	"github.com/shiywang/tist/pkg/util"
 )
-
-var once sync.Once
 
 // SQLConnPool is DB pool struct
 type SQLConnPool struct {
@@ -26,8 +32,6 @@ type SQLConnPool struct {
 // CreateMySQLClient func init DB pool
 func CreateMySQLClient(host, port, database, user, password, charset string, maxOpenConns, maxIdleConns int) *SQLConnPool {
 	var db *SQLConnPool
-	//Singleton mode only init once.
-	//once.Do(func() {
 	dataSourceName := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s&autocommit=true", user, password, host, port, database, charset)
 	db = &SQLConnPool{
 		DriverName:     "mysql",
@@ -38,8 +42,22 @@ func CreateMySQLClient(host, port, database, user, password, charset string, max
 	if err := db.Open(); err != nil {
 		util.CheckErr(err)
 	}
-	//})
 	return db
+}
+
+func (p *SQLConnPool) RetryPing() error {
+	yellow := color.FgYellow.Render
+	var err error
+	wait := 5 * time.Second
+	for attempts := 0; attempts < 5; attempts++ {
+		fmt.Println(yellow(fmt.Sprintf("retry ping for %d time(s).....", attempts)))
+		if err = p.sql.Ping(); err == nil {
+			return nil
+		}
+		wait = wait * 2
+		time.Sleep(wait)
+	}
+	return err
 }
 
 func (p *SQLConnPool) Open() error {
@@ -48,7 +66,7 @@ func (p *SQLConnPool) Open() error {
 	if err != nil {
 		return err
 	}
-	if err = p.sql.Ping(); err != nil {
+	if err = p.RetryPing(); err != nil {
 		return err
 	}
 	p.sql.SetMaxOpenConns(p.MaxOpenConns)

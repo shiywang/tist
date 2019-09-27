@@ -4,7 +4,7 @@ all: lint test build
 .PHONY: all
 
 build:
-	go build ./cmd/...
+	go build -o ./out/tist ./cmd/...
 .PHONY: build
 
 install:

@@ -24,16 +24,14 @@ type Test struct {
 	yamlPath    string
 	composePath string
 	steps       Steps
-	dbcli       api.DB
-	cluster     api.Cluster
+	db          api.DatabaseTester
+	cluster     api.ClusterIgniter
 	funcs       map[string]interface{}
 }
 
 func NewTestCommand() *Test {
 	return &Test{}
 }
-
-const dockerComposePath = "/Users/shiywang/pingcap/tidb-docker-compose/docker-compose.yml"
 
 func main() {
 	o := NewTestCommand()
@@ -44,12 +42,12 @@ func main() {
 		DisableFlagsInUseLine: true,
 		Run: func(cmd *cobra.Command, args []string) {
 			util.CheckErr(o.Complete())
-			util.CheckErr(o.LoadInterface())
+			util.CheckErr(o.Load())
 			util.CheckErr(o.Run())
 		},
 	}
 	rootCmd.Flags().StringVarP(&o.yamlPath, "file", "f", "", "yamlPath of the docker")
-	rootCmd.Flags().StringVarP(&o.composePath, "compose", "c", dockerComposePath, "docker-compose repo path")
+	rootCmd.Flags().StringVarP(&o.composePath, "compose", "c", "", "docker-compose repo path")
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(rootCmd.UsageString())
 		os.Exit(1)
@@ -76,10 +74,13 @@ func (o *Test) Complete() error {
 	return nil
 }
 
-func (o *Test) LoadInterface() error {
+func (o *Test) Load() error {
+	if o.composePath == "" {
+		o.composePath = util.GitCloneDockerCompose()
+	}
 	//binding all the test function and struct
 	o.cluster = &logic.DockerCompose{Path: o.composePath}
-	o.dbcli = &logic.MysqlDB{}
+	o.db = &logic.MysqlDB{}
 
 	o.funcs = map[string]interface{}{
 		"start-cluster": o.cluster.Start,
@@ -87,10 +88,10 @@ func (o *Test) LoadInterface() error {
 		"kill-cluster":  o.cluster.Kill,
 		"down-cluster":  o.cluster.Shutdown,
 
-		"create-db": o.dbcli.CreateDB,
-		"create-tb": o.dbcli.CreateTable,
-		"insert-tb": o.dbcli.InsertTable,
-		"query-all": o.dbcli.QueryAll,
+		"create-db": o.db.CreateDB,
+		"create-tb": o.db.CreateTable,
+		"insert-tb": o.db.InsertTable,
+		"query-all": o.db.QueryAll,
 	}
 
 	return nil

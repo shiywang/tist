@@ -1,7 +1,9 @@
 package logic
 
 import (
+	"errors"
 	"fmt"
+	"github.com/gookit/color"
 	"strings"
 
 	"github.com/shiywang/tist/pkg/base/docker"
@@ -25,8 +27,10 @@ func (d *DockerCompose) isUp() bool {
 }
 
 func (d *DockerCompose) Start() {
+	yellow := color.FgYellow.Render
+
 	if d.isUp() {
-		fmt.Println("cluster already up...")
+		fmt.Println(yellow("cluster already up..."))
 		return
 	}
 
@@ -35,7 +39,6 @@ func (d *DockerCompose) Start() {
 }
 
 func (d *DockerCompose) Stop() {
-
 	_, err := util.Exec(binCompose, "-f", d.Path, "stop")
 	util.CheckErr(err)
 }
@@ -53,16 +56,13 @@ func (d *DockerCompose) Kill(containerName string) {
 
 	container, err := ctl.GetContainerByName(containerName)
 	if err != nil {
-		fmt.Println("get Container named " + containerName + " fail")
-		fmt.Println(err)
+		util.CheckErr(errors.New(fmt.Sprintf("get Container named " + containerName + " fail")))
 		return
 	}
 
 	err = ctl.StopContainer(container.ID)
 	if err != nil {
-		fmt.Println("stop container " + containerName + " fail")
+		util.CheckErr(errors.New(fmt.Sprintf("stop container " + containerName + " fail")))
 		return
 	}
-
-	fmt.Println("kill container " + containerName + " ok")
 }

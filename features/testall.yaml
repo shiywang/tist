@@ -11,12 +11,12 @@
   args:     ["test", "test", "we testing all the data and insert one"]
 - description: kill a server
   code:     kill-cluster
-  args:     ["tidb-container1"]
+  args:     ["tidb-docker-compose_pd0_1"]
 - description: insert data
   code:     insert-tb
   args:     ["test", "test", "this is a data after kill a server"]
 - description: query all the data from table
   code:     query-all
-  args:     ["test-table"]
+  args:     ["test", "test"]
 - description: stop a 'docker-composed' TiDB cluster
   code:     stop-cluster

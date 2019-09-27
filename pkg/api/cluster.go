@@ -1,6 +1,6 @@
 package api
 
-type Cluster interface {
+type ClusterIgniter interface {
 	Start()
 	Stop()
 	Shutdown()

@@ -4,10 +4,16 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/gookit/color"
+	"os"
 	"os/exec"
 	"reflect"
+
+	"github.com/gookit/color"
 )
+
+const dockerComposeRepo = "https://github.com/pingcap/tidb-docker-compose.git"
+const dockerComposeRelativePath = "/tidb-docker-compose"
+const dockerComposeFile = "/docker-compose.yml"
 
 func CheckErr(err error) {
 	red := color.FgRed.Render
@@ -42,4 +48,21 @@ func Call(m map[string]interface{}, name string, params ...string) (result []ref
 	fmt.Println(green("succeed in calling step ", name))
 
 	return
+}
+
+func GitCloneDockerCompose() string {
+	green := color.FgGreen.Render
+	dir, err := os.Getwd()
+	if err != nil {
+		CheckErr(err)
+	}
+
+	if _, err := os.Stat(dir + dockerComposeRelativePath); os.IsNotExist(err) {
+		fmt.Print(green("git clone docker-compose repo....."))
+		_, err = Exec("git", "clone", dockerComposeRepo, dir+dockerComposeRelativePath)
+		CheckErr(err)
+		fmt.Println(green("done"))
+	}
+
+	return dir + dockerComposeRelativePath + dockerComposeFile
 }
