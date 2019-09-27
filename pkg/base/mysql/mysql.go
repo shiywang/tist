@@ -3,7 +3,7 @@
 This code is a reference from https://github.com/hopehook/golang-db
 with slightly modification
 
- */
+*/
 
 package mysql
 
@@ -50,7 +50,7 @@ func (p *SQLConnPool) RetryPing() error {
 	var err error
 	wait := 5 * time.Second
 	for attempts := 0; attempts < 5; attempts++ {
-		fmt.Println(yellow(fmt.Sprintf("retry ping for %d time(s).....", attempts)))
+		fmt.Println(yellow(fmt.Sprintf("retry ping for %d time(s).....", attempts+1)))
 		if err = p.sql.Ping(); err == nil {
 			return nil
 		}

@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 
 	"github.com/shiywang/tist/pkg/api"
+	"github.com/shiywang/tist/pkg/base/docker"
 	"github.com/shiywang/tist/pkg/logic"
 	"github.com/shiywang/tist/pkg/util"
 	"github.com/spf13/cobra"
@@ -20,7 +21,7 @@ type Steps []struct {
 	Args []string `yaml:"args"`
 }
 
-type Test struct {
+type Tist struct {
 	yamlPath    string
 	composePath string
 	steps       Steps
@@ -29,8 +30,8 @@ type Test struct {
 	funcs       map[string]interface{}
 }
 
-func NewTestCommand() *Test {
-	return &Test{}
+func NewTestCommand() *Tist {
+	return &Tist{}
 }
 
 func main() {
@@ -54,7 +55,7 @@ func main() {
 	}
 }
 
-func (o *Test) Complete() error {
+func (o *Tist) Complete() error {
 	if o.yamlPath == "" {
 		util.CheckErr(errors.New("you must specify yaml test file"))
 	}
@@ -74,12 +75,12 @@ func (o *Test) Complete() error {
 	return nil
 }
 
-func (o *Test) Load() error {
+func (o *Tist) Load() error {
 	if o.composePath == "" {
 		o.composePath = util.GitCloneDockerCompose()
 	}
 	//binding all the test function and struct
-	o.cluster = &logic.DockerCompose{Path: o.composePath}
+	o.cluster = &logic.DockerCompose{Path: o.composePath, Bash: &util.BashExec{}, Container: docker.CreateClient()}
 	o.db = &logic.MysqlDB{}
 
 	o.funcs = map[string]interface{}{
@@ -97,7 +98,7 @@ func (o *Test) Load() error {
 	return nil
 }
 
-func (o *Test) Run() error {
+func (o *Tist) Run() error {
 	for _, v := range o.steps {
 		var err error
 		if v.Args != nil {

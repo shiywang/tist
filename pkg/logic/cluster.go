@@ -14,11 +14,15 @@ const binCompose = "docker-compose"
 const binDocker = "docker"
 
 type DockerCompose struct {
-	Path string
+	Path      string
+	Bash      util.Execer
+	Container docker.Container
+	binName   string
 }
 
 func (d *DockerCompose) isUp() bool {
-	out, err := util.Exec(binDocker, "ps")
+	d.binName = binDocker
+	out, err := d.Bash.Exec(d.binName, "ps")
 	util.CheckErr(err)
 	if strings.Contains(out, "pingcap") {
 		return true
@@ -26,43 +30,49 @@ func (d *DockerCompose) isUp() bool {
 	return false
 }
 
-func (d *DockerCompose) Start() {
+func (d *DockerCompose) Start() string {
 	yellow := color.FgYellow.Render
 
 	if d.isUp() {
 		fmt.Println(yellow("cluster already up..."))
-		return
+		return ""
+	}
+	d.binName = binCompose
+
+	out, err := d.Bash.Exec(d.binName, "-f", d.Path, "up", "-d")
+	util.CheckErr(err)
+	return out
+}
+
+func (d *DockerCompose) Stop() string {
+	d.binName = binCompose
+	out, err := d.Bash.Exec(d.binName, "-f", d.Path, "stop")
+	util.CheckErr(err)
+	return out
+}
+
+func (d *DockerCompose) Shutdown() string {
+	d.binName = binCompose
+	out, err := d.Bash.Exec(d.binName, "-f", d.Path, "down")
+	util.CheckErr(err)
+	return out
+}
+
+func (d *DockerCompose) Kill(containerName string) string {
+	if d.Container == nil {
+		d.Container = docker.CreateClient()
 	}
 
-	_, err := util.Exec(binCompose, "-f", d.Path, "up", "-d")
-	util.CheckErr(err)
-}
-
-func (d *DockerCompose) Stop() {
-	_, err := util.Exec(binCompose, "-f", d.Path, "stop")
-	util.CheckErr(err)
-}
-
-func (d *DockerCompose) Shutdown() {
-	_, err := util.Exec(binCompose, "-f", d.Path, "down")
-	util.CheckErr(err)
-}
-
-func (d *DockerCompose) Kill(containerName string) {
-	ctl := docker.CreateClient()
-	if ctl == nil {
-		return
-	}
-
-	container, err := ctl.GetContainerByName(containerName)
+	container, err := d.Container.GetContainerByName(containerName)
 	if err != nil {
 		util.CheckErr(errors.New(fmt.Sprintf("get Container named " + containerName + " fail")))
-		return
+		return ""
 	}
 
-	err = ctl.StopContainer(container.ID)
+	err = d.Container.StopContainer(container.ID)
 	if err != nil {
-		util.CheckErr(errors.New(fmt.Sprintf("stop container " + containerName + " fail")))
-		return
+		util.CheckErr(errors.New(fmt.Sprintf("stop Container " + containerName + " fail")))
+		return ""
 	}
+	return "kill " + container.ID + " successfully"
 }

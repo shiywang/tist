@@ -3,17 +3,23 @@ package docker
 import (
 	"context"
 	"errors"
+	"sync"
+	"time"
+
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 	"github.com/shiywang/tist/pkg/util"
-	"sync"
-	"time"
 )
 
 var once sync.Once
-
 var ctl *DockerCtl
+
+type Container interface {
+	GetContainerByName(name string) (*types.Container, error)
+	StopContainer(containerID string) error
+	GetAllStartingContainer() ([]types.Container, error)
+}
 
 type DockerCtl struct {
 	cli *client.Client

@@ -1,8 +1,8 @@
 package api
 
 type ClusterIgniter interface {
-	Start()
-	Stop()
-	Shutdown()
-	Kill(containerName string)
+	Start() string
+	Stop() string
+	Shutdown() string
+	Kill(containerName string) string
 }
